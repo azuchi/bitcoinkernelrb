@@ -1,0 +1,58 @@
+# frozen_string_literal: true
+
+module BitcoinKernel
+  # Represents a Bitcoin transaction.
+  class Transaction < FFI::AutoPointer
+    # Create a Transaction from raw serialized data.
+    # @param [String] raw_tx Serialized transaction data (binary string)
+    # @return [Transaction]
+    def self.from_raw(raw_tx)
+      raw_ptr = FFI::MemoryPointer.new(:uint8, raw_tx.bytesize)
+      raw_ptr.put_bytes(0, raw_tx)
+      ptr = BitcoinKernel.btck_transaction_create(raw_ptr, raw_tx.bytesize)
+      raise Error, "Failed to create transaction from raw data" if ptr.null?
+      new(ptr)
+    end
+
+    def self.release(ptr)
+      BitcoinKernel.btck_transaction_destroy(ptr)
+    end
+
+    # Number of inputs in the transaction.
+    # @return [Integer]
+    def input_count
+      BitcoinKernel.btck_transaction_count_inputs(self)
+    end
+
+    # Number of outputs in the transaction.
+    # @return [Integer]
+    def output_count
+      BitcoinKernel.btck_transaction_count_outputs(self)
+    end
+
+    # Get output at specified index.
+    # @param [Integer] index Output index
+    # @return [TransactionOutput]
+    def output_at(index)
+      out_ptr = BitcoinKernel.btck_transaction_get_output_at(self, index)
+      raise Error, "Output not found at index #{index}" if out_ptr.null?
+      TransactionOutput.new(out_ptr, owned: false)
+    end
+
+    # Get all outputs.
+    # @return [Array<TransactionOutput>]
+    def outputs
+      output_count.times.map { |i| output_at(i) }
+    end
+
+    # Get the txid as hex string (little-endian, as commonly displayed).
+    # @return [String]
+    def txid
+      txid_ptr = BitcoinKernel.btck_transaction_get_txid(self)
+      raise Error, "Failed to get txid" if txid_ptr.null?
+      output = FFI::MemoryPointer.new(:uint8, 32)
+      BitcoinKernel.btck_txid_to_bytes(txid_ptr, output)
+      output.read_bytes(32).reverse.unpack1('H*')
+    end
+  end
+end

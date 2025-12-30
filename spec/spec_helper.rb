@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+ENV['LIB_BITCOINKERNEL_PATH'] ||= File.expand_path('lib/libbitcoinkernel.so', File.dirname(__FILE__))
+
 require "bitcoinkernel"
 
 RSpec.configure do |config|
