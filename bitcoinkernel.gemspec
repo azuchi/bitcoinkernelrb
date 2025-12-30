@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = "Ruby bindings for BitcoinKernel."
   spec.description = spec.summary 
-  spec.homepage = "https://github/com/azuchi/bitcoinkernelrb"
+  spec.homepage = "https://github.com/azuchi/bitcoinkernelrb"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1.0"
 
