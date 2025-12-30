@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["azuchi"]
   spec.email = ["azuchi@chaintope.com"]
 
-  spec.summary = ""
+  spec.summary = "Ruby bindings for BitcoinKernel."
   spec.description = spec.summary 
   spec.homepage = "https://github/com/azuchi/bitcoinkernelrb"
   spec.license = "MIT"
