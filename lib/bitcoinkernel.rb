@@ -132,9 +132,20 @@ module BitcoinKernel
   attach_function :btck_txid_to_bytes, [:pointer, :pointer], :void
   attach_function :btck_txid_destroy, [:pointer], :void
 
+  # Transaction input
+  attach_function :btck_transaction_input_get_out_point, [:pointer], :pointer
+  attach_function :btck_transaction_input_destroy, [:pointer], :void
+
+  # Transaction out point
+  attach_function :btck_transaction_out_point_get_index, [:pointer], :uint32
+  attach_function :btck_transaction_out_point_get_txid, [:pointer], :pointer
+  attach_function :btck_transaction_out_point_destroy, [:pointer], :void
+
   autoload :Block, 'bitcoinkernel/block'
   autoload :BlockHash, 'bitcoinkernel/block_hash'
   autoload :Transaction, 'bitcoinkernel/transaction'
+  autoload :TransactionInput, 'bitcoinkernel/transaction_input'
+  autoload :TransactionOutPoint, 'bitcoinkernel/transaction_out_point'
   autoload :TransactionOutput, 'bitcoinkernel/transaction_output'
   autoload :ScriptPubkey, 'bitcoinkernel/script_pubkey'
   autoload :ChainParameters, 'bitcoinkernel/chain_parameters'

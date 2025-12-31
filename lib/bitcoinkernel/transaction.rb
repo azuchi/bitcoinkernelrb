@@ -45,6 +45,21 @@ module BitcoinKernel
       output_count.times.map { |i| output_at(i) }
     end
 
+    # Get input at specified index.
+    # @param [Integer] index Input index
+    # @return [TransactionInput]
+    def input_at(index)
+      in_ptr = BitcoinKernel.btck_transaction_get_input_at(self, index)
+      raise Error, "Input not found at index #{index}" if in_ptr.null?
+      TransactionInput.new(in_ptr, owned: false)
+    end
+
+    # Get all inputs.
+    # @return [Array<TransactionInput>]
+    def inputs
+      input_count.times.map { |i| input_at(i) }
+    end
+
     # Get the txid as hex string (little-endian, as commonly displayed).
     # @return [String]
     def txid
