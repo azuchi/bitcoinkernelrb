@@ -40,5 +40,13 @@ module BitcoinKernel
     def to_hex
       to_bytes.reverse.unpack1('H*')
     end
+
+    # Compare two block hashes for equality.
+    # @param [BlockHash] other The other block hash to compare
+    # @return [Boolean]
+    def ==(other)
+      return false unless other.is_a?(BlockHash)
+      BitcoinKernel.btck_block_hash_equals(self, other) == 1
+    end
   end
 end

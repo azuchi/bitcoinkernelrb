@@ -49,4 +49,26 @@ RSpec.describe BitcoinKernel::BlockHash do
       expect(hash.to_bytes).to eq(genesis_block_hash_bytes)
     end
   end
+
+  describe '#==' do
+    let(:block_170_hash_hex) { "00000000d1145790a8694403d4063f323d499e655c83426834d4ce2f8dd4a2ee" }
+
+    it 'returns true for equal block hashes' do
+      hash1 = described_class.from_hex(genesis_block_hash_hex)
+      hash2 = described_class.from_hex(genesis_block_hash_hex)
+      expect(hash1 == hash2).to be true
+    end
+
+    it 'returns false for different block hashes' do
+      hash1 = described_class.from_hex(genesis_block_hash_hex)
+      hash2 = described_class.from_hex(block_170_hash_hex)
+      expect(hash1 == hash2).to be false
+    end
+
+    it 'returns false when comparing with non-BlockHash' do
+      hash = described_class.from_hex(genesis_block_hash_hex)
+      expect(hash == genesis_block_hash_hex).to be false
+      expect(hash == nil).to be false
+    end
+  end
 end

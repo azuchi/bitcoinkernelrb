@@ -96,6 +96,7 @@ module BitcoinKernel
 
   # Block hash
   attach_function :btck_block_hash_create, [:pointer], :pointer
+  attach_function :btck_block_hash_equals, [:pointer, :pointer], :int
   attach_function :btck_block_hash_to_bytes, [:pointer, :pointer], :void
   attach_function :btck_block_hash_destroy, [:pointer], :void
 
@@ -135,6 +136,7 @@ module BitcoinKernel
   attach_function :btck_script_pubkey_destroy, [:pointer], :void
 
   # Txid
+  attach_function :btck_txid_equals, [:pointer, :pointer], :int
   attach_function :btck_txid_to_bytes, [:pointer, :pointer], :void
   attach_function :btck_txid_destroy, [:pointer], :void
 
@@ -155,6 +157,7 @@ module BitcoinKernel
   autoload :TransactionOutPoint, 'bitcoinkernel/transaction_out_point'
   autoload :TransactionOutput, 'bitcoinkernel/transaction_output'
   autoload :ScriptPubkey, 'bitcoinkernel/script_pubkey'
+  autoload :Txid, 'bitcoinkernel/txid'
   autoload :ChainParameters, 'bitcoinkernel/chain_parameters'
   autoload :ContextOptions, 'bitcoinkernel/context_options'
   autoload :Context, 'bitcoinkernel/context'

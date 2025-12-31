@@ -63,14 +63,12 @@ module BitcoinKernel
       input_count.times.map { |i| input_at(i) }
     end
 
-    # Get the txid as hex string (little-endian, as commonly displayed).
-    # @return [String]
+    # Get the txid.
+    # @return [Txid]
     def txid
-      txid_ptr = BitcoinKernel.btck_transaction_get_txid(self)
-      raise Error, "Failed to get txid" if txid_ptr.null?
-      output = FFI::MemoryPointer.new(:uint8, 32)
-      BitcoinKernel.btck_txid_to_bytes(txid_ptr, output)
-      output.read_bytes(32).reverse.unpack1('H*')
+      ptr = BitcoinKernel.btck_transaction_get_txid(self)
+      raise Error, "Failed to get txid" if ptr.null?
+      Txid.new(ptr, owned: false)
     end
   end
 end
