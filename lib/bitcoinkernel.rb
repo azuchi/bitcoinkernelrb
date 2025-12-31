@@ -76,6 +76,9 @@ module BitcoinKernel
   # Chainstate manager options
   attach_function :btck_chainstate_manager_options_create, [:pointer, :string, :size_t, :string, :size_t], :pointer
   attach_function :btck_chainstate_manager_options_set_worker_threads_num, [:pointer, :int], :void
+  attach_function :btck_chainstate_manager_options_set_wipe_dbs, [:pointer, :int, :int], :int
+  attach_function :btck_chainstate_manager_options_update_block_tree_db_in_memory, [:pointer, :int], :void
+  attach_function :btck_chainstate_manager_options_update_chainstate_db_in_memory, [:pointer, :int], :void
   attach_function :btck_chainstate_manager_options_destroy, [:pointer], :void
 
   # Chainstate manager
@@ -107,10 +110,16 @@ module BitcoinKernel
   # Chain
   attach_function :btck_chain_get_height, [:pointer], :int32
   attach_function :btck_chain_get_by_height, [:pointer, :int], :pointer
+  attach_function :btck_chain_contains, [:pointer, :pointer], :int
 
   # Block tree entry
   attach_function :btck_block_tree_entry_get_height, [:pointer], :int32
   attach_function :btck_block_tree_entry_get_block_hash, [:pointer], :pointer
+  attach_function :btck_block_tree_entry_get_previous, [:pointer], :pointer
+  attach_function :btck_block_tree_entry_equals, [:pointer, :pointer], :int
+
+  # Block read (requires ChainstateManager)
+  attach_function :btck_block_read, [:pointer, :pointer], :pointer
 
   # Transaction
   attach_function :btck_transaction_create, [:pointer, :size_t], :pointer
@@ -131,9 +140,13 @@ module BitcoinKernel
 
   # Script pubkey
   attach_function :btck_script_pubkey_create, [:pointer, :size_t], :pointer
-  attach_function :btck_script_pubkey_verify, [:pointer, :int64, :pointer, :pointer, :size_t, :uint, :uint32, :pointer], :int
+  attach_function :btck_script_pubkey_verify, [:pointer, :int64, :pointer, :pointer, :uint, :uint32, :pointer], :int
   attach_function :btck_script_pubkey_to_bytes, [:pointer, :btck_write_bytes, :pointer], :int
   attach_function :btck_script_pubkey_destroy, [:pointer], :void
+
+  # Precomputed transaction data
+  attach_function :btck_precomputed_transaction_data_create, [:pointer, :pointer, :size_t], :pointer
+  attach_function :btck_precomputed_transaction_data_destroy, [:pointer], :void
 
   # Txid
   attach_function :btck_txid_equals, [:pointer, :pointer], :int

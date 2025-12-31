@@ -41,21 +41,26 @@ module BitcoinKernel
     def verify(amount:, tx:, input_index:, spent_outputs: [], flags: ScriptFlags::ALL)
       status_ptr = FFI::MemoryPointer.new(:uint8)
 
-      if spent_outputs.empty?
-        result = BitcoinKernel.btck_script_pubkey_verify(
-          self, amount, tx, nil, 0, input_index, flags, status_ptr
-        )
-      else
+      # Create precomputed transaction data
+      precomputed_ptr = nil
+      unless spent_outputs.empty?
         outputs_ptr = FFI::MemoryPointer.new(:pointer, spent_outputs.size)
         spent_outputs.each_with_index do |out, i|
           outputs_ptr.put_pointer(i * FFI::Pointer.size, out)
         end
-        result = BitcoinKernel.btck_script_pubkey_verify(
-          self, amount, tx, outputs_ptr, spent_outputs.size, input_index, flags, status_ptr
+        precomputed_ptr = BitcoinKernel.btck_precomputed_transaction_data_create(
+          tx, outputs_ptr, spent_outputs.size
         )
       end
 
-      result == 1
+      begin
+        result = BitcoinKernel.btck_script_pubkey_verify(
+          self, amount, tx, precomputed_ptr, input_index, flags, status_ptr
+        )
+        result == 1
+      ensure
+        BitcoinKernel.btck_precomputed_transaction_data_destroy(precomputed_ptr) if precomputed_ptr
+      end
     end
   end
 end
