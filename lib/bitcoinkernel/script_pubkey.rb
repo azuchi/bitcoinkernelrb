@@ -3,6 +3,9 @@
 module BitcoinKernel
   # Represents a script pubkey.
   class ScriptPubkey < FFI::AutoPointer
+    include Serializable
+    serialize_with :btck_script_pubkey_to_bytes
+
     # Create a ScriptPubkey from raw bytes.
     # @param [String] script Raw script bytes (binary string)
     # @return [ScriptPubkey]

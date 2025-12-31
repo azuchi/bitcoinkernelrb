@@ -97,4 +97,11 @@ RSpec.describe BitcoinKernel::Block do
       expect(block.block_hash.to_hex).to eq(genesis_block_hash)
     end
   end
+
+  describe '#to_bytes' do
+    it 'serializes the block back to original bytes' do
+      block = described_class.from_raw(genesis_block_raw)
+      expect(block.to_bytes).to eq(genesis_block_raw)
+    end
+  end
 end

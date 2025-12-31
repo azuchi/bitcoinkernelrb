@@ -3,6 +3,9 @@
 module BitcoinKernel
   # Represents a Bitcoin transaction.
   class Transaction < FFI::AutoPointer
+    include Serializable
+    serialize_with :btck_transaction_to_bytes
+
     # Create a Transaction from raw serialized data.
     # @param [String] raw_tx Serialized transaction data (binary string)
     # @return [Transaction]

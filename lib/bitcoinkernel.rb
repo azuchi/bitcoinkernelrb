@@ -53,6 +53,9 @@ module BitcoinKernel
   end
 
 
+  # Callback for serializing data
+  callback :btck_write_bytes, [:pointer, :size_t, :pointer], :int
+
   # Logging
   attach_function :btck_logging_disable, [], :void
 
@@ -88,6 +91,7 @@ module BitcoinKernel
   attach_function :btck_block_count_transactions, [:pointer], :size_t
   attach_function :btck_block_get_transaction_at, [:pointer, :size_t], :pointer
   attach_function :btck_block_get_hash, [:pointer], :pointer
+  attach_function :btck_block_to_bytes, [:pointer, :btck_write_bytes, :pointer], :int
   attach_function :btck_block_destroy, [:pointer], :void
 
   # Block hash
@@ -110,6 +114,7 @@ module BitcoinKernel
   # Transaction
   attach_function :btck_transaction_create, [:pointer, :size_t], :pointer
   attach_function :btck_transaction_copy, [:pointer], :pointer
+  attach_function :btck_transaction_to_bytes, [:pointer, :btck_write_bytes, :pointer], :int
   attach_function :btck_transaction_count_outputs, [:pointer], :size_t
   attach_function :btck_transaction_count_inputs, [:pointer], :size_t
   attach_function :btck_transaction_get_output_at, [:pointer, :size_t], :pointer
@@ -126,6 +131,7 @@ module BitcoinKernel
   # Script pubkey
   attach_function :btck_script_pubkey_create, [:pointer, :size_t], :pointer
   attach_function :btck_script_pubkey_verify, [:pointer, :int64, :pointer, :pointer, :size_t, :uint, :uint32, :pointer], :int
+  attach_function :btck_script_pubkey_to_bytes, [:pointer, :btck_write_bytes, :pointer], :int
   attach_function :btck_script_pubkey_destroy, [:pointer], :void
 
   # Txid
@@ -141,6 +147,7 @@ module BitcoinKernel
   attach_function :btck_transaction_out_point_get_txid, [:pointer], :pointer
   attach_function :btck_transaction_out_point_destroy, [:pointer], :void
 
+  autoload :Serializable, 'bitcoinkernel/serializable'
   autoload :Block, 'bitcoinkernel/block'
   autoload :BlockHash, 'bitcoinkernel/block_hash'
   autoload :Transaction, 'bitcoinkernel/transaction'

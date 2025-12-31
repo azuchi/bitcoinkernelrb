@@ -73,6 +73,13 @@ RSpec.describe BitcoinKernel::Transaction do
     end
   end
 
+  describe '#to_bytes' do
+    it 'serializes the transaction back to original bytes' do
+      tx = described_class.from_raw(genesis_coinbase_raw)
+      expect(tx.to_bytes).to eq(genesis_coinbase_raw)
+    end
+  end
+
   describe '#input_at' do
     it 'returns the input at the given index' do
       tx = described_class.from_raw(genesis_coinbase_raw)

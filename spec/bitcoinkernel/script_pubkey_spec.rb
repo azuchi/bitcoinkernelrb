@@ -32,6 +32,18 @@ RSpec.describe BitcoinKernel::ScriptPubkey do
     end
   end
 
+  describe '#to_bytes' do
+    it 'serializes the script back to original bytes' do
+      script = described_class.from_raw(p2pkh_script_raw)
+      expect(script.to_bytes).to eq(p2pkh_script_raw)
+    end
+
+    it 'works with P2PK script' do
+      script = described_class.from_raw(genesis_p2pk_script_raw)
+      expect(script.to_bytes).to eq(genesis_p2pk_script_raw)
+    end
+  end
+
   describe '#verify' do
     # Block 170: First Bitcoin transaction from Satoshi to Hal Finney
     # txid: f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16

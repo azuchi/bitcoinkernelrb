@@ -3,6 +3,9 @@
 module BitcoinKernel
   # Represents a Bitcoin block.
   class Block < FFI::AutoPointer
+    include Serializable
+    serialize_with :btck_block_to_bytes
+
     # Create a Block from raw serialized data.
     # @param [String] raw_block Serialized block data (binary string)
     # @return [Block]
