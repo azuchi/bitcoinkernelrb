@@ -162,6 +162,13 @@ module BitcoinKernel
   attach_function :btck_transaction_out_point_get_txid, [:pointer], :pointer
   attach_function :btck_transaction_out_point_destroy, [:pointer], :void
 
+  # Permanently disable kernel logging output for this process.
+  # Once called, logging cannot be re-enabled.
+  # This function should only be called once and is not thread-safe.
+  def self.disable_logging
+    btck_logging_disable
+  end
+
   autoload :Serializable, 'bitcoinkernel/serializable'
   autoload :Block, 'bitcoinkernel/block'
   autoload :BlockHash, 'bitcoinkernel/block_hash'

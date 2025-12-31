@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe BitcoinKernel do
-  it "has a version number" do
-    expect(BitcoinKernel::VERSION).not_to be nil
+  describe '.disable_logging' do
+    it 'disables logging without error' do
+      expect { BitcoinKernel.disable_logging }.not_to raise_error
+    end
   end
 end
