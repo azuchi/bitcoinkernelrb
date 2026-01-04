@@ -2,6 +2,8 @@
 
 Ruby bindings for [libbitcoinkernel](https://github.com/bitcoin/bitcoin/blob/master/doc/design/libraries.md#libbitcoinkernel), the Bitcoin Core consensus engine library.
 
+This corresponds to the BitcoinKernel in commit 2bff9ebeff87a06ec6b72ec0e324c2e316f7281f.
+
 ## Requirements
 
 - Ruby 3.0+
