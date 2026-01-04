@@ -1,39 +1,232 @@
-# Bitcoinkernelrb
+# BitcoinKernel
 
-TODO: Delete this and the text below, and describe your gem
+Ruby bindings for [libbitcoinkernel](https://github.com/bitcoin/bitcoin/blob/master/doc/design/libraries.md#libbitcoinkernel), the Bitcoin Core consensus engine library.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/bitcoinkernel`. To experiment with that code, run `bin/console` for an interactive prompt.
+## Requirements
+
+- Ruby 3.0+
+- libbitcoinkernel shared library
+
+You need to build libbitcoinkernel from Bitcoin Core source:
+
+```bash
+git clone https://github.com/bitcoin/bitcoin.git
+cd bitcoin
+cmake -B build -DBUILD_KERNEL_LIB=ON -DBUILD_SHARED_LIBS=ON
+cmake --build build
+```
+
+Set the `LIB_BITCOINKERNEL_PATH` environment variable to point to the built library:
+
+```bash
+export LIB_BITCOINKERNEL_PATH=/path/to/bitcoin/build/src/kernel/libbitcoinkernel.so
+```
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Add this line to your application's Gemfile:
 
-Install the gem and add to the application's Gemfile by executing:
+```ruby
+gem 'bitcoinkernel'
+```
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+And then execute:
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+```bash
+$ bundle install
+```
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+Or install it yourself as:
+
+```bash
+$ gem install bitcoinkernel
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+### Basic Block Parsing
 
-## Development
+```ruby
+require 'bitcoinkernel'
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+# Parse a block from raw bytes
+block_hex = "0100000000000000..."
+block = BitcoinKernel::Block.from_raw([block_hex].pack('H*'))
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+# Access block properties
+puts block.block_hash.to_hex
+puts "Transaction count: #{block.transaction_count}"
 
-## Contributing
+# Iterate transactions
+block.transactions.each do |tx|
+  puts "Txid: #{tx.txid.to_hex}"
+  puts "Inputs: #{tx.input_count}, Outputs: #{tx.output_count}"
+end
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/bitcoinkernel. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/bitcoinkernel/blob/main/CODE_OF_CONDUCT.md).
+# Serialize back to bytes
+raw_bytes = block.to_bytes
+```
+
+### Transaction Parsing
+
+```ruby
+# Parse a transaction
+tx = BitcoinKernel::Transaction.from_raw(raw_tx_bytes)
+
+# Access inputs
+tx.inputs.each do |input|
+  out_point = input.out_point
+  puts "Spending #{out_point.txid.to_hex}:#{out_point.index}"
+end
+
+# Access outputs
+tx.outputs.each_with_index do |output, i|
+  puts "Output #{i}: #{output.amount} satoshis"
+end
+```
+
+### Script Verification
+
+```ruby
+# Verify a script
+script = BitcoinKernel::ScriptPubkey.from_raw(script_bytes)
+
+result = script.verify(
+  amount: 50_0000_0000,  # in satoshis
+  tx: spending_tx,
+  input_index: 0,
+  flags: BitcoinKernel::ScriptFlags::ALL
+)
+
+puts result ? "Valid" : "Invalid"
+```
+
+### Chainstate Management
+
+```ruby
+# Disable logging (optional)
+BitcoinKernel::Logging.disable
+
+# Create context with chain parameters
+options = BitcoinKernel::ContextOptions.create
+params = BitcoinKernel::ChainParameters.regtest  # or .mainnet, .testnet, etc.
+options.set_chainparams(params)
+context = BitcoinKernel::Context.create(options)
+
+# Create chainstate manager
+cs_options = BitcoinKernel::ChainstateManagerOptions.create(
+  context: context,
+  data_directory: "/path/to/data",
+  blocks_directory: "/path/to/blocks"
+)
+cs_options.set_block_tree_db_in_memory
+cs_options.set_chainstate_db_in_memory
+
+manager = BitcoinKernel::ChainstateManager.create(cs_options)
+
+# Process blocks
+block = BitcoinKernel::Block.from_raw(block_bytes)
+manager.process_block(block)
+
+# Query the chain
+chain = manager.active_chain
+puts "Chain height: #{chain.height}"
+
+entry = chain.entry_at(0)
+puts "Genesis hash: #{entry.block_hash.to_hex}"
+```
+
+### Validation Interface
+
+```ruby
+# Create a custom validation interface
+class MyValidationInterface < BitcoinKernel::ValidationInterface
+  def block_checked(block, state)
+    if state.valid?
+      puts "Block valid: #{block.block_hash.to_hex}"
+    else
+      puts "Block invalid"
+    end
+  end
+
+  def block_connected(block, entry)
+    puts "Block connected at height #{entry.height}"
+  end
+end
+
+# Use with context
+vi = MyValidationInterface.new
+options = BitcoinKernel::ContextOptions.create
+options.set_validation_interface(vi)
+context = BitcoinKernel::Context.create(options)
+```
+
+### Logging Configuration
+
+```ruby
+# Disable all logging
+BitcoinKernel::Logging.disable
+
+# Or configure logging options
+BitcoinKernel::Logging.set_options(
+  timestamps: true,
+  time_micros: false,
+  threadnames: false,
+  sourcelocations: false,
+  category_levels: true
+)
+
+# Set log level for specific category
+BitcoinKernel::Logging.set_level(
+  BitcoinKernel::Logging::Category::VALIDATION,
+  BitcoinKernel::Logging::Level::DEBUG
+)
+
+# Enable/disable categories
+BitcoinKernel::Logging.enable_category(BitcoinKernel::Logging::Category::ALL)
+BitcoinKernel::Logging.disable_category(BitcoinKernel::Logging::Category::MEMPOOL)
+```
+
+## API Reference
+
+### Core Classes
+
+| Class | Description |
+|-------|-------------|
+| `Block` | Bitcoin block with header and transactions |
+| `BlockHash` | 32-byte block hash |
+| `Transaction` | Bitcoin transaction |
+| `Txid` | 32-byte transaction ID |
+| `TransactionInput` | Transaction input |
+| `TransactionOutput` | Transaction output with amount and script |
+| `TransactionOutPoint` | Reference to a previous output (txid + index) |
+| `ScriptPubkey` | Output script with verification support |
+
+### Chain Management
+
+| Class | Description |
+|-------|-------------|
+| `Context` | Kernel context for chain operations |
+| `ContextOptions` | Configuration for context creation |
+| `ChainParameters` | Network parameters (mainnet, testnet, regtest, etc.) |
+| `ChainstateManager` | Manages blockchain state and validation |
+| `ChainstateManagerOptions` | Configuration for chainstate manager |
+| `Chain` | Active blockchain view |
+| `BlockTreeEntry` | Entry in the block tree |
+| `BlockValidationState` | Validation result for a block |
+| `ValidationInterface` | Callbacks for validation events |
+
+### Constants
+
+| Module | Description |
+|--------|-------------|
+| `ChainType` | Network types (MAINNET, TESTNET, REGTEST, etc.) |
+| `ScriptFlags` | Script verification flags |
+| `ValidationMode` | Block validation modes |
+| `BlockValidationResult` | Validation failure reasons |
+| `Logging::Category` | Log categories |
+| `Logging::Level` | Log levels (TRACE, DEBUG, INFO) |
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-## Code of Conduct
-
-Everyone interacting in the Bitcoinkernel project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/bitcoinkernel/blob/main/CODE_OF_CONDUCT.md).
