@@ -214,5 +214,20 @@ RSpec.describe BitcoinKernel::Chain do
       entry = chain.entry_at(1000000)
       expect(entry).to be_nil
     end
+
+    it 'returns genesis entry at height 0' do
+      chain = chainstate_manager.active_chain
+      entry = chain.entry_at(0)
+      expect(entry).to be_a(BitcoinKernel::BlockTreeEntry)
+      expect(entry.height).to eq(0)
+    end
+  end
+
+  describe '#contains?' do
+    it 'returns true for entry in chain' do
+      chain = chainstate_manager.active_chain
+      entry = chain.entry_at(0)
+      expect(chain.contains?(entry)).to be(true)
+    end
   end
 end
