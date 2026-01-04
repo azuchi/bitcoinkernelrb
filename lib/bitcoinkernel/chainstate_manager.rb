@@ -46,7 +46,7 @@ module BitcoinKernel
     # @param [BlockTreeEntry] entry The block tree entry
     # @return [Block]
     def read_block(entry)
-      ptr = BitcoinKernel.btck_block_read(self, entry)
+      ptr = BitcoinKernel.btck_block_read(self, entry.to_ptr)
       raise Error, "Failed to read block" if ptr.null?
       Block.new(ptr)
     end
