@@ -1,21 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe BitcoinKernel::Block do
-  # Mainnet genesis block (raw hex)
-  let(:genesis_block_hex) do
-    "0100000000000000000000000000000000000000000000000000000000000000" \
-    "000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa" \
-    "4b1e5e4a29ab5f49ffff001d1dac2b7c01010000000100000000000000000000" \
-    "00000000000000000000000000000000000000000000ffffffff4d04ffff001d" \
-    "0104455468652054696d65732030332f4a616e2f32303039204368616e63656c" \
-    "6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f75742066" \
-    "6f722062616e6b73ffffffff0100f2052a0100000043410467e6e1ee157c96e9" \
-    "7d0e8f5b0b7e8e8d8f0c2a1b3e9f8c7d6e5a4b3c2d1e0f9a8b7c6d5e4f3a2b1" \
-    "c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0ac" \
-    "00000000"
-  end
-
-  # Correct genesis block raw data
+  # Mainnet genesis block raw data
   let(:genesis_block_raw) do
     [
       "01000000" + # version
@@ -114,10 +100,21 @@ RSpec.describe BitcoinKernel::Block do
   end
 
   describe '#==' do
+    # Regtest genesis block
+    let(:regtest_genesis_raw) do
+      ['0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4adae5494dffff7f20020000000101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a0100000043410496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858eeac00000000'].pack('H*')
+    end
+
     it 'returns true for blocks with same hash' do
       block1 = described_class.from_raw(genesis_block_raw)
       block2 = described_class.from_raw(genesis_block_raw)
       expect(block1 == block2).to be(true)
+    end
+
+    it 'returns false for different blocks' do
+      mainnet_block = described_class.from_raw(genesis_block_raw)
+      regtest_block = described_class.from_raw(regtest_genesis_raw)
+      expect(mainnet_block == regtest_block).to be(false)
     end
 
     it 'returns false for non-Block' do

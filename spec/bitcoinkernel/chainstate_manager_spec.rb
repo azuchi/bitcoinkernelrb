@@ -82,14 +82,14 @@ RSpec.describe BitcoinKernel::ChainstateManager do
 
       # Get the genesis block entry from chain
       chain = manager.active_chain
-      next unless chain.height >= 0
+      expect(chain.height).to be >= 0
 
       entry = chain.entry_at(0)
-      next if entry.nil?
+      expect(entry).not_to be_nil
 
       read_block = manager.read_block(entry)
       expect(read_block).to be_a(BitcoinKernel::Block)
-      expect(read_block.block_hash.to_hex).to eq(block.block_hash.to_hex)
+      expect(read_block).to eq(block)
     end
   end
 end
