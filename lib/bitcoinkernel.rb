@@ -52,6 +52,8 @@ module BitcoinKernel
     ALL = P2SH | DERSIG | NULLDUMMY | CHECKLOCKTIMEVERIFY | CHECKSEQUENCEVERIFY | WITNESS | TAPROOT
   end
 
+  # Load Logging module early (required for attach_function)
+  require_relative 'bitcoinkernel/logging'
 
   # Callback for serializing data
   callback :btck_write_bytes, [:pointer, :size_t, :pointer], :int
@@ -75,6 +77,10 @@ module BitcoinKernel
 
   # Logging
   attach_function :btck_logging_disable, [], :void
+  attach_function :btck_logging_set_options, [Logging::Options.by_value], :void
+  attach_function :btck_logging_set_level_category, [:uint8, :uint8], :void
+  attach_function :btck_logging_enable_category, [:uint8], :void
+  attach_function :btck_logging_disable_category, [:uint8], :void
 
   # Chain parameters
   attach_function :btck_chain_parameters_create, [:uint8], :pointer
@@ -179,13 +185,6 @@ module BitcoinKernel
   attach_function :btck_transaction_out_point_get_index, [:pointer], :uint32
   attach_function :btck_transaction_out_point_get_txid, [:pointer], :pointer
   attach_function :btck_transaction_out_point_destroy, [:pointer], :void
-
-  # Permanently disable kernel logging output for this process.
-  # Once called, logging cannot be re-enabled.
-  # This function should only be called once and is not thread-safe.
-  def self.disable_logging
-    btck_logging_disable
-  end
 
   autoload :Serializable, 'bitcoinkernel/serializable'
   autoload :Block, 'bitcoinkernel/block'
