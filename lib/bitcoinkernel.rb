@@ -56,6 +56,23 @@ module BitcoinKernel
   # Callback for serializing data
   callback :btck_write_bytes, [:pointer, :size_t, :pointer], :int
 
+  # Validation interface callbacks
+  callback :btck_validation_interface_block_checked, [:pointer, :pointer, :pointer], :void
+  callback :btck_validation_interface_pow_valid_block, [:pointer, :pointer, :pointer], :void
+  callback :btck_validation_interface_block_connected, [:pointer, :pointer, :pointer], :void
+  callback :btck_validation_interface_block_disconnected, [:pointer, :pointer, :pointer], :void
+  callback :btck_destroy_callback, [:pointer], :void
+
+  # Validation interface callbacks struct
+  class ValidationInterfaceCallbacks < FFI::Struct
+    layout :user_data, :pointer,
+           :user_data_destroy, :btck_destroy_callback,
+           :block_checked, :btck_validation_interface_block_checked,
+           :pow_valid_block, :btck_validation_interface_pow_valid_block,
+           :block_connected, :btck_validation_interface_block_connected,
+           :block_disconnected, :btck_validation_interface_block_disconnected
+  end
+
   # Logging
   attach_function :btck_logging_disable, [], :void
 
@@ -66,6 +83,7 @@ module BitcoinKernel
   # Context options
   attach_function :btck_context_options_create, [], :pointer
   attach_function :btck_context_options_set_chainparams, [:pointer, :pointer], :void
+  attach_function :btck_context_options_set_validation_interface, [:pointer, ValidationInterfaceCallbacks.by_value], :void
   attach_function :btck_context_options_destroy, [:pointer], :void
 
   # Context
@@ -185,4 +203,6 @@ module BitcoinKernel
   autoload :ChainstateManager, 'bitcoinkernel/chainstate_manager'
   autoload :Chain, 'bitcoinkernel/chain'
   autoload :BlockTreeEntry, 'bitcoinkernel/block_tree_entry'
+  autoload :BlockValidationState, 'bitcoinkernel/block_validation_state'
+  autoload :ValidationInterface, 'bitcoinkernel/validation_interface'
 end
