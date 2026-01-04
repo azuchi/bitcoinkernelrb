@@ -103,4 +103,26 @@ RSpec.describe BitcoinKernel::Block do
       expect(block.to_bytes).to eq(genesis_block_raw)
     end
   end
+
+  describe '#copy' do
+    it 'creates an equal copy of the block' do
+      block = described_class.from_raw(genesis_block_raw)
+      copied = block.copy
+      expect(copied).to be_a(BitcoinKernel::Block)
+      expect(copied).to eq(block)
+    end
+  end
+
+  describe '#==' do
+    it 'returns true for blocks with same hash' do
+      block1 = described_class.from_raw(genesis_block_raw)
+      block2 = described_class.from_raw(genesis_block_raw)
+      expect(block1 == block2).to be(true)
+    end
+
+    it 'returns false for non-Block' do
+      block = described_class.from_raw(genesis_block_raw)
+      expect(block == "not a block").to be(false)
+    end
+  end
 end

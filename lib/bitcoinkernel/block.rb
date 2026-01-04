@@ -21,6 +21,22 @@ module BitcoinKernel
       BitcoinKernel.btck_block_destroy(ptr)
     end
 
+    # Create a copy of this block.
+    # @return [Block] A new Block instance with copied data
+    def copy
+      copied_ptr = BitcoinKernel.btck_block_copy(self)
+      raise Error, "Failed to copy block" if copied_ptr.null?
+      Block.new(copied_ptr)
+    end
+
+    # Compare two blocks for equality by their block hash.
+    # @param [Block] other The other block to compare
+    # @return [Boolean]
+    def ==(other)
+      return false unless other.is_a?(Block)
+      block_hash == other.block_hash
+    end
+
     # Number of transactions in the block.
     # @return [Integer]
     def transaction_count

@@ -21,6 +21,22 @@ module BitcoinKernel
       BitcoinKernel.btck_transaction_destroy(ptr)
     end
 
+    # Create a copy of this transaction.
+    # @return [Transaction] A new Transaction instance with copied data
+    def copy
+      copied_ptr = BitcoinKernel.btck_transaction_copy(self)
+      raise Error, "Failed to copy transaction" if copied_ptr.null?
+      Transaction.new(copied_ptr)
+    end
+
+    # Compare two transactions for equality by their txid.
+    # @param [Transaction] other The other transaction to compare
+    # @return [Boolean]
+    def ==(other)
+      return false unless other.is_a?(Transaction)
+      txid == other.txid
+    end
+
     # Number of inputs in the transaction.
     # @return [Integer]
     def input_count
