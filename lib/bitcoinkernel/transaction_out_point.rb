@@ -30,5 +30,13 @@ module BitcoinKernel
       raise Error, "Failed to get txid" if ptr.null?
       Txid.new(ptr, owned: false)
     end
+
+    # Compare two transaction outpoints for equality by txid and index.
+    # @param [TransactionOutPoint] other The other outpoint to compare
+    # @return [Boolean]
+    def ==(other)
+      return false unless other.is_a?(TransactionOutPoint)
+      txid == other.txid && index == other.index
+    end
   end
 end

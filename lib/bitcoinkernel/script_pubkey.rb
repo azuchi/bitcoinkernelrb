@@ -31,6 +31,14 @@ module BitcoinKernel
       BitcoinKernel.btck_script_pubkey_destroy(ptr)
     end
 
+    # Compare two script pubkeys for equality by their serialized bytes.
+    # @param [ScriptPubkey] other The other script pubkey to compare
+    # @return [Boolean]
+    def ==(other)
+      return false unless other.is_a?(ScriptPubkey)
+      to_bytes == other.to_bytes
+    end
+
     # Verify that the script is correctly spent by a transaction input.
     # @param [Integer] amount Amount in satoshis
     # @param [Transaction] tx Transaction spending this script

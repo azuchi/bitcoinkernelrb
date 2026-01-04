@@ -32,5 +32,13 @@ module BitcoinKernel
       raise Error, "Failed to get script pubkey" if spk_ptr.null?
       ScriptPubkey.new(spk_ptr, owned: false)
     end
+
+    # Compare two transaction outputs for equality by amount and script pubkey.
+    # @param [TransactionOutput] other The other output to compare
+    # @return [Boolean]
+    def ==(other)
+      return false unless other.is_a?(TransactionOutput)
+      amount == other.amount && script_pubkey == other.script_pubkey
+    end
   end
 end

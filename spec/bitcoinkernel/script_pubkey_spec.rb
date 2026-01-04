@@ -121,6 +121,25 @@ RSpec.describe BitcoinKernel::ScriptPubkey do
     end
   end
 
+  describe '#==' do
+    it 'returns true for equal scripts' do
+      script1 = described_class.from_raw(p2pkh_script_raw)
+      script2 = described_class.from_raw(p2pkh_script_raw)
+      expect(script1 == script2).to be(true)
+    end
+
+    it 'returns false for different scripts' do
+      script1 = described_class.from_raw(p2pkh_script_raw)
+      script2 = described_class.from_raw(genesis_p2pk_script_raw)
+      expect(script1 == script2).to be(false)
+    end
+
+    it 'returns false for non-ScriptPubkey' do
+      script = described_class.from_raw(p2pkh_script_raw)
+      expect(script == "not a script").to be(false)
+    end
+  end
+
   describe 'ownership' do
     it 'can be created with owned: true (default)' do
       script = described_class.from_raw(p2pkh_script_raw)
